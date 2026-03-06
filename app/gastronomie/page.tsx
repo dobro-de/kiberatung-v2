@@ -1,38 +1,22 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getBrancheBySlug, getAllBranchenSlugs, BRANCHEN } from "@/lib/branchen";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+import { cities } from "./[stadt]/cityData";
+import { getBrancheBySlug, BRANCHEN } from "@/lib/branchen";
 
-interface Props {
-  params: Promise<{ slug: string }>;
-}
+export const metadata: Metadata = {
+  title: "KI Beratung für Gastronomie & Restaurants | kiberatung.de",
+  description:
+    "KI-Lösungen für Restaurants, Hotels und Cafés: Reservierungsbot, Bewertungsmanagement, Speisekarten-KI. Kostenlos beraten lassen.",
+  alternates: {
+    canonical: "https://kiberatung-v2.vercel.app/gastronomie",
+  },
+};
 
-// "gastronomie" hat eine eigene dedizierte Page unter app/gastronomie/page.tsx
-const DEDICATED_PAGES = ["gastronomie"];
+const b = getBrancheBySlug("gastronomie")!;
 
-export function generateStaticParams() {
-  return getAllBranchenSlugs()
-    .filter((slug) => !DEDICATED_PAGES.includes(slug))
-    .map((slug) => ({ slug }));
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  const b = getBrancheBySlug(slug);
-  if (!b) return {};
-  return { title: b.metaTitle, description: b.metaDescription };
-}
-
-export default async function BranchePage({ params }: Props) {
-  const { slug } = await params;
-  const b = getBrancheBySlug(slug);
-  if (!b) notFound();
-
-  // Pick a consistent top-stat per slug based on first Lösung
-  const topStat = b.loesungen[0];
-
+export default function GastronomiePage() {
   return (
     <>
       <Nav />
@@ -46,37 +30,40 @@ export default async function BranchePage({ params }: Props) {
               <span>›</span>
               <Link href="/branchen">Branchen</Link>
               <span>›</span>
-              <span>{b.name}</span>
+              <span>Gastronomie</span>
             </nav>
 
-            {/* Unique large icon per branche */}
+            {/* Big icon */}
             <div className="branche-hero-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <path d={b.svgPath} />
+                <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                <line x1="6" y1="1" x2="6" y2="4"/>
+                <line x1="10" y1="1" x2="10" y2="4"/>
+                <line x1="14" y1="1" x2="14" y2="4"/>
               </svg>
             </div>
 
             <h1 className="branche-title font-display">
-              {b.heroTitle.replace(b.name.toUpperCase(), "")}
-              <span className="text-accent"> {b.name.toUpperCase()}</span>
+              KI BERATUNG FÜR <span className="text-accent">GASTRONOMIE</span>
             </h1>
             <p className="branche-subtitle">{b.heroSubtitle}</p>
 
-            {/* Quick-stat row from top Lösung */}
+            {/* Hero stats */}
             <div className="branche-hero-stats">
               <div className="branche-hero-stat">
-                <span className="branche-hero-stat-val">{b.loesungen[0].stat}</span>
-                <span className="branche-hero-stat-lbl">{b.loesungen[0].statLabel}</span>
+                <span className="branche-hero-stat-val">80.000+</span>
+                <span className="branche-hero-stat-lbl">Gastronomiebetriebe in DE</span>
               </div>
               <div className="branche-hero-stat-divider" />
               <div className="branche-hero-stat">
-                <span className="branche-hero-stat-val">{b.loesungen[1].stat}</span>
-                <span className="branche-hero-stat-lbl">{b.loesungen[1].statLabel}</span>
+                <span className="branche-hero-stat-val">−80%</span>
+                <span className="branche-hero-stat-lbl">Telefonanfragen mit KI-Bot</span>
               </div>
               <div className="branche-hero-stat-divider" />
               <div className="branche-hero-stat">
-                <span className="branche-hero-stat-val">{b.loesungen[2].stat}</span>
-                <span className="branche-hero-stat-lbl">{b.loesungen[2].statLabel}</span>
+                <span className="branche-hero-stat-val">24/7</span>
+                <span className="branche-hero-stat-lbl">Erreichbarkeit für Ihre Gäste</span>
               </div>
             </div>
 
@@ -92,9 +79,7 @@ export default async function BranchePage({ params }: Props) {
           <div className="container">
             <div className="branche-section-head">
               <span className="section-eyebrow">Herausforderungen</span>
-              <h2 className="section-heading section-heading-center">
-                Was hält {b.name}-Unternehmen zurück?
-              </h2>
+              <h2 className="section-heading section-heading-center">Was hält Gastronomen zurück?</h2>
             </div>
             <div className="branche-challenges-grid">
               {b.challenges.map((c, i) => (
@@ -113,9 +98,7 @@ export default async function BranchePage({ params }: Props) {
           <div className="container">
             <div className="branche-section-head">
               <span className="section-eyebrow">KI-Lösungen</span>
-              <h2 className="section-heading section-heading-center">
-                Was wir für {b.name} tun
-              </h2>
+              <h2 className="section-heading section-heading-center">Was wir für Ihre Gastronomie tun</h2>
             </div>
             <div className="branche-solutions-grid">
               {b.loesungen.map((l, i) => (
@@ -133,11 +116,38 @@ export default async function BranchePage({ params }: Props) {
           </div>
         </section>
 
+        {/* ── STÄDTE ── */}
+        <section className="branche-section branche-challenges-bg">
+          <div className="container">
+            <div className="branche-section-head">
+              <span className="section-eyebrow">Lokale Beratung</span>
+              <h2 className="section-heading section-heading-center">
+                KI Beratung für Gastronomie in Ihrer Stadt
+              </h2>
+              <p className="section-sub section-sub-center" style={{ maxWidth: 560, margin: "0.75rem auto 0" }}>
+                Wir beraten Gastronomiebetriebe in ganz Deutschland — mit lokalen Kenntnissen und erprobten Lösungen.
+              </p>
+            </div>
+            <div className="gastro-cities-grid">
+              {cities.map((city) => (
+                <Link
+                  key={city.slug}
+                  href={`/gastronomie/${city.slug}`}
+                  className="gastro-city-card"
+                >
+                  <span className="gastro-city-name">{city.name}</span>
+                  <span className="gastro-city-stat">{city.stats.betriebe} Betriebe</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA ── */}
         <section className="branche-cta-section">
           <div className="container">
             <div className="branche-cta-inner">
-              <h2 className="section-heading">Bereit für KI in Ihrer {b.name}?</h2>
+              <h2 className="section-heading">Bereit für KI in Ihrer Gastronomie?</h2>
               <p>In einem kostenlosen 30-Minuten-Gespräch analysieren wir Ihre größten Hebel und zeigen konkrete Einstiegspunkte.</p>
               <a href="mailto:info@kiberatung.de" className="btn-accent btn-accent-lg">
                 Jetzt kostenloses Gespräch buchen →
@@ -151,7 +161,7 @@ export default async function BranchePage({ params }: Props) {
           <div className="container">
             <h3 className="branche-more-label">Weitere Branchen</h3>
             <div className="branche-more-pills">
-              {BRANCHEN.filter((x) => x.slug !== slug).map((x) => (
+              {BRANCHEN.filter((x) => x.slug !== "gastronomie").map((x) => (
                 <Link key={x.slug} href={`/${x.slug}`} className="branche-pill">{x.name}</Link>
               ))}
             </div>
