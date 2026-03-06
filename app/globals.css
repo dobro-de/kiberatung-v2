@@ -2515,3 +2515,49 @@ body {
   }
   .loesung-usecase-grid { grid-template-columns: 1fr; }
 }
+
+/* ── GASTRONOMIE FOOTER ── */
+.gastro-footer-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  padding: 3rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 3rem;
+}
+.gastro-footer-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+.gastro-footer-heading svg { flex-shrink: 0; }
+.gastro-footer-links {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.3rem 1.5rem;
+}
+.gastro-footer-links li a {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  text-decoration: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.gastro-footer-links li a:hover { color: var(--accent); }
+.gastro-footer-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin-bottom: 2.5rem;
+  display: none; /* already have border-bottom above */
+}
+@media (max-width: 768px) {
+  .gastro-footer-section { grid-template-columns: 1fr; gap: 2rem; }
+  .gastro-footer-links { grid-template-columns: 1fr 1fr; }
+}

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
-import { cityMap, generateStaticParamsList } from "./cityData";
+import { cityMap, generateStaticParamsList, type CityData } from "./cityData";
+import { getVariantBySlug, VARIANTEN_SLUGS } from "./variantenData";
 
 import LocalHero from "./components/LocalHero";
 import CityStats from "./components/CityStats";
@@ -14,7 +15,18 @@ import CTASection from "./components/CTASection";
 
 // ─── Static Params ──────────────────────────────────────────────────────────
 export function generateStaticParams() {
-  return generateStaticParamsList();
+  return [
+    ...generateStaticParamsList(),
+    ...VARIANTEN_SLUGS.map((s) => ({ stadt: s })),
+  ];
+}
+
+// ─── Resolve slug to CityData ────────────────────────────────────────────────
+function resolveData(slug: string): CityData | null {
+  if (cityMap[slug]) return cityMap[slug];
+  const v = getVariantBySlug(slug);
+  if (v) return { ...v, layout: 1 };
+  return null;
 }
 
 // ─── Metadata ───────────────────────────────────────────────────────────────
@@ -24,15 +36,12 @@ export async function generateMetadata({
   params: Promise<{ stadt: string }>;
 }): Promise<Metadata> {
   const { stadt } = await params;
-  const city = cityMap[stadt];
+  const city = resolveData(stadt);
   if (!city) return {};
-
   return {
     title: city.metaTitle,
     description: city.metaDescription,
-    alternates: {
-      canonical: `https://kiberatung-v2.vercel.app/gastronomie/${city.slug}`,
-    },
+    alternates: { canonical: `https://kiberatung-v2.vercel.app/gastronomie/${city.slug}` },
     openGraph: {
       title: city.metaTitle,
       description: city.metaDescription,
@@ -45,32 +54,21 @@ export async function generateMetadata({
 }
 
 // ─── JSON-LD Schema ──────────────────────────────────────────────────────────
-function SchemaMarkup({ cityName, slug }: { cityName: string; slug: string }) {
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    name: `KI Beratung Gastronomie ${cityName}`,
-    serviceType: "KI Beratung",
-    areaServed: cityName,
-    provider: {
-      "@type": "Organization",
-      name: "KI Beratung",
-      url: "https://kiberatung-v2.vercel.app",
-    },
-    url: `https://kiberatung-v2.vercel.app/gastronomie/${slug}`,
-    description: `Professionelle KI Beratung für die Gastronomie in ${cityName}. Prozessautomatisierung, Kostensenkung und Umsatzsteigerung durch künstliche Intelligenz.`,
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "EUR",
-      description: "Kostenlose Erstberatung",
-    },
-  };
-
+function SchemaMarkup({ name, slug }: { name: string; slug: string }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Service",
+          name: `KI Beratung Gastronomie ${name}`,
+          serviceType: "KI Beratung",
+          provider: { "@type": "Organization", name: "KI Beratung", url: "https://kiberatung-v2.vercel.app" },
+          url: `https://kiberatung-v2.vercel.app/gastronomie/${slug}`,
+          offers: { "@type": "Offer", price: "0", priceCurrency: "EUR", description: "Kostenlose Erstberatung" },
+        }),
+      }}
     />
   );
 }
@@ -82,7 +80,7 @@ export default async function GastronomieStadtPage({
   params: Promise<{ stadt: string }>;
 }) {
   const { stadt } = await params;
-  const city = cityMap[stadt];
+  const city = resolveData(stadt);
   if (!city) notFound();
 
   const sections = {
@@ -95,19 +93,11 @@ export default async function GastronomieStadtPage({
     cta: <CTASection key="cta" city={city} />,
   };
 
-  // Layout variants
-  let order: (keyof typeof sections)[];
-  if (city.layout === 1) {
-    order = ["hero", "stats", "problems", "features", "caseStudy", "faq", "cta"];
-  } else if (city.layout === 2) {
-    order = ["hero", "caseStudy", "problems", "stats", "features", "faq", "cta"];
-  } else {
-    order = ["hero", "features", "stats", "caseStudy", "problems", "faq", "cta"];
-  }
+  const order: (keyof typeof sections)[] = ["hero", "stats", "problems", "features", "caseStudy", "faq", "cta"];
 
   return (
     <>
-      <SchemaMarkup cityName={city.name} slug={city.slug} />
+      <SchemaMarkup name={city.name} slug={city.slug} />
       <Nav />
       <main>{order.map((key) => sections[key])}</main>
       <Footer />

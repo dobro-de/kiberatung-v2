@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
+import GastronomieFooter from "@/components/GastronomieFooter";
 import { cities } from "./[stadt]/cityData";
+import { variantenMap, VARIANTEN_SLUGS } from "./[stadt]/variantenData";
 import { getBrancheBySlug, BRANCHEN } from "@/lib/branchen";
 
 export const metadata: Metadata = {
@@ -156,8 +157,34 @@ export default function GastronomiePage() {
           </div>
         </section>
 
-        {/* ── WEITERE BRANCHEN ── */}
+        {/* ── BETRIEBSTYPEN ── */}
         <section className="branche-section">
+          <div className="container">
+            <div className="branche-section-head">
+              <span className="section-eyebrow">Betriebstypen</span>
+              <h2 className="section-heading section-heading-center">
+                KI Beratung nach Betriebstyp
+              </h2>
+              <p className="section-sub section-sub-center" style={{ maxWidth: 520, margin: "0.75rem auto 0" }}>
+                Jeder Betriebstyp hat eigene Herausforderungen — und eigene KI-Lösungen.
+              </p>
+            </div>
+            <div className="gastro-cities-grid">
+              {VARIANTEN_SLUGS.map((slug) => {
+                const v = variantenMap[slug];
+                return (
+                  <Link key={slug} href={`/gastronomie/${slug}`} className="gastro-city-card">
+                    <span className="gastro-city-name">{v.name}</span>
+                    <span className="gastro-city-stat">{v.stats.betriebe} Betriebe</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ── WEITERE BRANCHEN ── */}
+        <section className="branche-section branche-challenges-bg">
           <div className="container">
             <h3 className="branche-more-label">Weitere Branchen</h3>
             <div className="branche-more-pills">
@@ -169,7 +196,7 @@ export default function GastronomiePage() {
         </section>
 
       </main>
-      <Footer />
+      <GastronomieFooter />
     </>
   );
 }
